@@ -25,7 +25,7 @@ struct Basis
         n_divisions, 
         (end_point - start_point) / (n_divisions-1),
         Dict{Integer, Function}(),
-        range(start_point, end_point, n_divisions)
+        range(start_point, end_point, length = n_divisions)
     )
 
 end
@@ -78,7 +78,7 @@ end
 # Construct an interpolation by taking a dot product of basic functions and node values 
 function linear_combination(basis::Basis, coefficients::Array{Float64, 1}, shift::Function, result_length::Int64)::Tuple{Array{Float64, 1}, Array{Float64, 1}}
 
-    domain = range(basis.a, basis.b, result_length)
+    domain = range(basis.a, basis.b, length = result_length)
     image = zeros(result_length)
 
     for i in eachindex(coefficients)
@@ -123,7 +123,7 @@ function integral(start_point::Float64, end_point::Float64, integrand::Function)
 
     integral_width = (end_point - start_point) / integral_steps
 
-    return sum(map(integrand, range(start_point, end_point, integral_steps)) .* integral_width)
+    return sum(map(integrand, range(start_point, end_point, length = integral_steps)) .* integral_width)
 
 end
 
@@ -161,63 +161,6 @@ function solve_FEM(a::Float64, b::Float64, val_a::Float64, val_b::Float64, n_nod
     node_values = [0.0; lhs_matrix(basis) \ rhs_vector(basis, mass_distribution, shift_slope); 0.0]
 
     return linear_combination(basis, node_values, shift, result_length)
-
-end
-
-
-# Tests used to validate particular functions
-
-function test_basis()
-
-    basis = Basis(0.0, 5.0, 5)
-    display(basis.nodes)
-    println(basis.h)
-
-end
-
-function test_basic_functions()
-
-    domain_range = (0.0, 5.0)
-    n_basis = 5
-
-    basis = Basis(domain_range..., n_basis)
-    domain = range(domain_range..., 100)
-
-    plot(legend = false) |> display
-
-    for i in 1:n_basis
-        plot!(domain, map(basis[i], domain), seriestype = :scatter) |> display
-    end
-
-end
-
-function test_linear_combination()
-
-    basis = Basis(0.0, 5.0, 100)
-    coefficients = map(sin, basis.nodes)
-
-    shift = x -> 0.0
-
-    domain, image = linear_combination(basis, coefficients, shift, 1000)
-
-    plot(domain, image) |> display
-
-end
-
-function test_lhs_matrix()
-
-    basis = Basis(0.0, 5.0, 10)
-    lhs = lhs_matrix(basis)
-
-    display(lhs)
-
-end
-
-function test_integral()
-
-    fun = x -> x^2
-
-    println(integral(0.0, 1.0, fun))
 
 end
 
