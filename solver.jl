@@ -31,7 +31,7 @@ struct Basis
 end
 
 
-# COnvention: Basis[i] is an i-th basic function
+# Convention: Basis[i] is an i-th basic function
 function Base.getindex(basis::Basis, i::Int64)::Function
 
     if get(basis.basic_funs, i, nothing) === nothing
@@ -133,7 +133,7 @@ function rhs_vector(basis::Basis, mass_distribution::Function, shift_slope::Floa
 
     return [
         (
-            -4π * G *integral(basis.nodes[i-1], basis.nodes[i+1], x -> basis[i](x) * mass_distribution(x)) + 
+            -4π * G *integral(basis.nodes[i-1], basis.nodes[i+1], x -> basis[i](x) * mass_distribution(x)) - 
             integral(basis.nodes[i-1], basis.nodes[i+1], x -> (
                     if basis.nodes[i-1] ≤ x ≤ basis.nodes[i]
                         return shift_slope / basis.h
@@ -240,6 +240,3 @@ function main(n_nodes::Int64 = 100)
     plot(domain, image, legend = false)
 
 end
-
-
-main()
